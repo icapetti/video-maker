@@ -1,0 +1,19 @@
+{
+  "name": "video-maker",
+  "version": "1.0.0",
+  "description": "O projeto possui 4 robôs que criam vídeos para o YouTube com base no termo de busca indicado pelo usuário.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/icapetti/video-maker.git"
+  },
+  "author": "icapetti",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/icapetti/video-maker/issues"
+  },
+  "homepage": "https://github.com/icapetti/video-maker#readme"
+}
