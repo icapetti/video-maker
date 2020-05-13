@@ -1,13 +1,24 @@
 const readline = require('readline-sync')
 
+/* Importa o robô text.js */
+const robots = {
+    text: require('./robots/text.js')
+}
+
 /* Função para agregação das funcionalidades */
-function start(){
+async function start(){
 
     /* Objeto para "guardar" tudo o que acontecer, como o termo utilizado na busca, as sentençãs encontradas etc. */
     const content = {}
 
     content.searchTerm = askAndReturnSearchTerm()
     content.prefix = askAndReturnPrefix()
+
+    /* Aciona o robô text.js passando o content. O robô tem que terminar de executar para o restante do código
+     * ser executado, por isso usamos "await" e a função start está como assíncrona (async), visto que o robô
+     * "text" retorna funções assíncronas.
+     */
+    await robots.text(content)
 
     function askAndReturnSearchTerm(){
 
