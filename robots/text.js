@@ -9,6 +9,7 @@ async function robot(content){
 
     /* Recebe o conteúdo da Wikipedia */
     await fetchContentFromWikipedia(content)
+    sanitizeContent(content)
 
     /* "Limpa (sanitiza)" o conteúdo recebido da Wikipedia */
     //sanitizeContent(content)
@@ -48,11 +49,59 @@ async function robot(content){
 
         /* Salva o conteúdo da Wikipedia na nossa estrutura de dados "content" */
         content.sourceContentOriginal = wikipediaContent.content
-
-        console.log(wikipediaContent)
-
     }
-    
+
+    function sanitizeContent(content){
+        /* Função para sanitizar o conteúdo da wikipédia */
+
+        /* Quebra o conteúdo em linhas e remove linhas em branco */
+        const withoutBlankLines = removeBlankLines(content.sourceContentOriginal)
+        /* Remove o Markdown (começa com =) */
+        const withoutMarkdown = removeMarkdown(withoutBlankLines)
+        /* Remove as datas entre parênteses */
+        const withoutDatesInParentheses = removeDatesInParentheses(withoutMarkdown)
+
+        /* Salva o conteúdo sanitizado na nossa estrutura de dados (propriedade "courceContentSanitized") */
+        content.sourceContentSanitized = withoutDatesInParentheses
+
+        //console.log(withoutDatesInParentheses)
+
+        function removeBlankLines(text){
+            /* Função para quebrar o conteúdo em linhas e remover linhas em branco*/
+
+            /* Quebra o conteúdo em linhas */
+            const allLines = text.split('\n')
+
+            /* Remove linhas em branco rodando um filter em todas as linhas e identificando aquelas que tem um length 0*/
+            const withoutBlankLines = allLines.filter((line) => {
+                if(line.trim().length === 0){
+                    /* Se o tamanho da linha for 0 ele fica de fora (é excluído, filtrado) */
+                    return false
+                }
+                /* Se o tamanho da linha for diferente de 0 então a linha é mantida */
+                return true
+            })
+            return withoutBlankLines
+        }
+
+        function removeMarkdown(lines){
+            /* Utiliza a mesma lógica da função removeBlankLines, utilizando filter e startsWith para remover o "=" 
+             * que a Wikipedia utiliza como markdown.
+             */
+            const withoutMarkdown = lines.filter((line) => {
+                if(line.trim().startsWith('=')){
+                    return false
+                }
+                return true
+            })
+            return withoutMarkdown
+        }
+
+        function removeDatesInParentheses(text){
+            /* String() porque estava dando um erro com replace (só aceita conteúdo Strin e não estava reconhecendo text como String) */
+            return String(text).replace(/\((?:\([^()]*\)|[^()])*\)/gm,'').replace(/  /g,' ')
+        }
+    }
 }
 
 /* "Exporta" o módulo (text.js) para ser importado no index.js (nosso "orquestrador") */
