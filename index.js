@@ -47,7 +47,7 @@ async function start(){
         return selectedPrefixText
     }
 
-    console.log(content.sourceContentSanitized)
+    console.log(content.sentences)
 
 }
 

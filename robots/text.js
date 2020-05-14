@@ -4,18 +4,20 @@ const algorithmia = require('algorithmia')
 /* Importa o json criado com a apikey do Algorithmia */
 const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 
+/* Importa a biblioteca sbd (Sentence Boundary Detection): npm i sbd */
+const sentenceBoundaryDetection = require('sbd')
+
 /* Esta função também teve que ser implementada como assíncrona para que também aguarde a execução do código */
 async function robot(content){
 
     /* Recebe o conteúdo da Wikipedia */
     await fetchContentFromWikipedia(content)
-    sanitizeContent(content)
 
     /* "Limpa (sanitiza)" o conteúdo recebido da Wikipedia */
-    //sanitizeContent(content)
+    sanitizeContent(content)
 
     /* Quebra em sentenças o conteúdo recebido da Wikipedia, após sanitizar */
-    //breakContentIntoSentences(content)
+    breakContentIntoSentences(content)
 
     async function fetchContentFromWikipedia(content){
         /* 
@@ -52,7 +54,7 @@ async function robot(content){
     }
 
     function sanitizeContent(content){
-        /* Função para sanitizar o conteúdo da wikipédia */
+        /* ---Função para sanitizar o conteúdo da wikipédia--- */
 
         /* Quebra o conteúdo em linhas e remove linhas em branco */
         const withoutBlankLines = removeBlankLines(content.sourceContentOriginal)
@@ -63,6 +65,8 @@ async function robot(content){
 
         /* Salva o conteúdo sanitizado na nossa estrutura de dados (propriedade "courceContentSanitized") */
         content.sourceContentSanitized = withoutDatesInParentheses
+
+
 
         //console.log(withoutDatesInParentheses)
 
@@ -101,6 +105,23 @@ async function robot(content){
             /* String() porque estava dando um erro com replace (só aceita conteúdo Strin e não estava reconhecendo text como String) */
             return String(text).replace(/\((?:\([^()]*\)|[^()])*\)/gm,'').replace(/  /g,' ')
         }
+    }
+
+    function breakContentIntoSentences(content){
+        content.sentences = []
+
+        const sentences = sentenceBoundaryDetection.sentences(content.sourceContentSanitized)
+        
+        /* Salva as sentenças na nossa estrutura de dados */
+
+        /* Para cada sentença será feito um push no array de sentenças inserindo o objeto com as 3 propriedades */
+        sentences.forEach((sentence) => {
+            content.sentences.push({
+                text: sentence,
+                keywords: [],
+                images: []
+            })
+        })
     }
 }
 
