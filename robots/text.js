@@ -7,6 +7,19 @@ const algorithmiaApiKey = require('../credentials/algorithmia.json').apiKey
 /* Importa a biblioteca sbd (Sentence Boundary Detection): npm i sbd */
 const sentenceBoundaryDetection = require('sbd')
 
+/* Importa o json criado com a apiKey do Watson (Natural Language Understanding) */
+const watsonApiKey = require('../credentials/watson_nlu.json').apikey
+
+/* Importa módulo Watson Developer Cloud: npm i watson-developer-cloud */
+const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js')
+
+/* Instância para conectar na API, onde informamos a key, a versão e a url. O retorno é por call back */
+var nlu = new NaturalLanguageUnderstandingV1({
+    iam_apiKey: watsonApiKey,
+    version: '2018-04-05',
+    url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
+})
+
 /* Esta função também teve que ser implementada como assíncrona para que também aguarde a execução do código */
 async function robot(content){
 
@@ -58,17 +71,15 @@ async function robot(content){
 
         /* Quebra o conteúdo em linhas e remove linhas em branco */
         const withoutBlankLines = removeBlankLines(content.sourceContentOriginal)
+        
         /* Remove o Markdown (começa com =) */
         const withoutMarkdown = removeMarkdown(withoutBlankLines)
+        
         /* Remove as datas entre parênteses */
         const withoutDatesInParentheses = removeDatesInParentheses(withoutMarkdown)
 
         /* Salva o conteúdo sanitizado na nossa estrutura de dados (propriedade "courceContentSanitized") */
         content.sourceContentSanitized = withoutDatesInParentheses
-
-
-
-        //console.log(withoutDatesInParentheses)
 
         function removeBlankLines(text){
             /* Função para quebrar o conteúdo em linhas e remover linhas em branco*/
@@ -120,6 +131,31 @@ async function robot(content){
                 text: sentence,
                 keywords: [],
                 images: []
+            })
+        })
+    }
+
+    /* 
+     * Função assíncrona que recebe uma sentença e retorna as keywords.
+     * É feito um map para filtrar do json de retorno apenas as keywords.
+     */
+    async function fetchWatsonAndReturnKeywords(sentence){
+        return new Promise((resolve, reject) => {
+            nlu.analyze({
+                text: sentence,
+                features: {
+                    keywords: {}
+                }
+            }, (error, response) => {
+                if(error){
+                    throw error
+                }
+
+                const keywords = response.keywords.map((keyword) => {
+                    return keyword.text
+                })
+
+                resolve(keywords)
             })
         })
     }
