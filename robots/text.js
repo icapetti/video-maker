@@ -1,3 +1,8 @@
+/**
+ * ESTE ROBÔ BUSCA E CAPTA O CONTEÚDO DA WIKIPEDIA, SANITIZA ESTE CONTEÚDO, QUEBRA EM SENTENÇAS, 
+ * CAPTURA AS KEYWORDS DO CONTEÚDO COM O WATSON E INSERE ESSAS KEYWORDS NO OBJETO CONTENT
+ */
+
 /* Importa o módulo Algorithmia */
 const algorithmia = require('algorithmia')
 
@@ -14,14 +19,18 @@ const watsonApiKey = require('../credentials/watson_nlu.json').apikey
 const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-language-understanding/v1.js')
 
 /* Instância para conectar na API, onde informamos a key, a versão e a url. O retorno é por call back */
-var nlu = new NaturalLanguageUnderstandingV1({
+const nlu = new NaturalLanguageUnderstandingV1({
     iam_apikey: watsonApiKey,
     version: '2018-04-05',
     url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
 })
 
+const state = require('./state.js')
+
 /* Esta função também teve que ser implementada como assíncrona para que também aguarde a execução do código */
-async function robot(content){
+async function robot(){
+
+    const content = state.load()
 
     /* Recebe o conteúdo da Wikipedia */
     await fetchContentFromWikipedia(content)
@@ -37,6 +46,8 @@ async function robot(content){
 
     /* Preenche as Keywords de cada sentença */
     await fetchKeywordsOfAllSentences(content)
+
+    state.save(content)
 
     async function fetchContentFromWikipedia(content){
         /* 
