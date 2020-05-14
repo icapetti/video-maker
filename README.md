@@ -6,6 +6,7 @@ Tecnologias e ferramentas utilizadas:
 
 - Javascript e Node.js.
 - Bibliotecas Sentence Boundary Detection (sbd) e Readline sync.
+- IBM Watson
 - API Wikipedia Parser (Algorithmia.com).
 - Visual Studio Code, Git, GitHub e GitHub Desktop.
 
