@@ -15,7 +15,7 @@ const NaturalLanguageUnderstandingV1 = require('watson-developer-cloud/natural-l
 
 /* Instância para conectar na API, onde informamos a key, a versão e a url. O retorno é por call back */
 var nlu = new NaturalLanguageUnderstandingV1({
-    iam_apiKey: watsonApiKey,
+    iam_apikey: watsonApiKey,
     version: '2018-04-05',
     url: 'https://gateway.watsonplatform.net/natural-language-understanding/api/'
 })
@@ -31,6 +31,12 @@ async function robot(content){
 
     /* Quebra em sentenças o conteúdo recebido da Wikipedia, após sanitizar */
     breakContentIntoSentences(content)
+
+    /* Limita a quantidade de sentenças que o Watson irá analisar */
+    limitMaximumSentences(content)
+
+    /* Preenche as Keywords de cada sentença */
+    await fetchKeywordsOfAllSentences(content)
 
     async function fetchContentFromWikipedia(content){
         /* 
@@ -133,6 +139,21 @@ async function robot(content){
                 images: []
             })
         })
+    }
+
+    /*
+     * Função pega o array de sentenças "content.sentences" e usa o método slice 
+     * para pegar as sentenças da posição 0 até o limite definido (maximumSentences)
+     */
+    function limitMaximumSentences(content){
+        content.sentences = content.sentences.slice(0, content.maximumSentences)
+    }
+
+    /* Função que preenche as sentenças com as keywords retornadas pelo Watson */
+    async function fetchKeywordsOfAllSentences(content){
+        for(const sentence of content.sentences){
+            sentence.keywords = await fetchWatsonAndReturnKeywords(sentence.text)
+        }
     }
 
     /* 
